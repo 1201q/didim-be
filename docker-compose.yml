@@ -10,13 +10,14 @@ services:
     networks:
       - app-network
     env_file:
-      - .env
+      - .env.api
     environment:
       - NEST_URL=http://interview:8000
       - ML_SERVER_URL=http://ml-server:5000
       - BULL_REDIS_URL=redis://redis:6379/0
       - TZ=Asia/Seoul
     platform: linux/arm64
+
   ml-server:
     image: 1201q/ml-server:latest
     container_name: ml-server
@@ -24,13 +25,14 @@ services:
     expose:
       - "5000"
     env_file:
-      - .env
+      - .env.api
     networks:
       - app-network
     environment:
       - NEST_URL=http://interview:8000
       - TZ=Asia/Seoul
     platform: linux/arm64
+
   nginx:
     image: nginx:latest
     container_name: nginx
@@ -39,9 +41,9 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - /etc/letsencrypt:/etc/letsencrypt
-      - /var/www/certbot:/var/www/certbot
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/.htpasswd:/etc/nginx/.htpasswd:ro
     depends_on:
       - app
       - ml-server
@@ -50,13 +52,7 @@ services:
     environment:
       - TZ=Asia/Seoul
     platform: linux/arm64
-  certbot:
-    image: certbot/certbot:latest
-    container_name: certbot
-    volumes:
-      - /etc/letsencrypt:/etc/letsencrypt
-      - /var/www/certbot:/var/www/certbot
-    platform: linux/arm64
+
   redis:
     image: redis:latest
     container_name: redis

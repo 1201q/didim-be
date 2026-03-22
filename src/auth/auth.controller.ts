@@ -46,7 +46,9 @@ export class AuthController {
     secure: this.isProd,
     sameSite: "lax" as SameSite,
     path: "/",
-    domain: this.isProd ? "aiterview.tech" : undefined,
+    domain: this.isProd
+      ? this.configService.get<string>("COOKIE_DOMAIN", ".wedidim.com")
+      : undefined,
   };
 
   private get accessCookieOpts() {
@@ -111,8 +113,11 @@ export class AuthController {
       // });
 
       const url = this.isProd
-        ? `https://aiterview.tech`
-        : `http://localhost:3000`;
+        ? this.configService.get<string>("FRONTEND_URL", "https://wedidim.com")
+        : this.configService.get<string>(
+            "FRONTEND_URL",
+            "http://localhost:3000",
+          );
 
       return res.redirect(url);
     } catch (error) {

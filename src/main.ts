@@ -11,16 +11,24 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(passport.initialize());
 
+  const corsOrigins =
+    process.env.CORS_ORIGINS?.split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean) ??
+    (process.env.NODE_ENV !== "production"
+      ? ["http://localhost:3000"]
+      : ["https://wedidim.com", "https://www.wedidim.com"]);
+
   if (process.env.NODE_ENV !== "production") {
     app.enableCors({
-      origin: ["http://localhost:3000"],
+      origin: corsOrigins,
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
     });
   } else {
     app.enableCors({
-      origin: ["https://aiterview.tech", "https://www.aiterview.tech"],
+      origin: corsOrigins,
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
